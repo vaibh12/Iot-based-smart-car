@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "expo_firebase_boilerplate",
-    "slug": "expo_firebase_boilerplate",
+    "name": "Vaahan Suraksha",
+    "slug": "vaahan_suraksha",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,22 +13,23 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.expo_firebase_boilerplate"
+      "package": "com.vaahan_suraksha"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "description": "Expo firebase boilerplate with authentication and redux setup."
+    "description": "Smart car to send accident alert to selected contacts."
   }
 }

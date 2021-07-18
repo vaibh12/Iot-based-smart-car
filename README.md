@@ -1,11 +1,9 @@
-[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/rishi-singh26/Expo_firebase_boilerplate)
-
-# Expo app with firebse authentication and stack navigation setup
+# Smart car to send accident alert to selected contacts
 
 ## Installation
 
 ```sh
-$ https://github.com/rishi-singh26/Expo_firebase_boilerplate.git
+$ https://github.com/vaibh12/Iot-based-smart-car.git
 Clones this repo
 $ npm install
 Install all the node modules
@@ -38,17 +36,3 @@ export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 export const cloudStorage = firebase.storage();
 ```
-
-### Dependencies
-
-| Dependencies                          | README                                                                |
-| ------------------------------------- | --------------------------------------------------------------------- |
-| firebase                              | [https://www.npmjs.com/package/firebase]                              |
-| redux                                 | [https://www.npmjs.com/package/redux]                                 |
-| react-redux                           | [https://www.npmjs.com/package/react-redux]                           |
-| redux-logger                          | [https://www.npmjs.com/package/redux-logger]                          |
-| redux-persist                         | [https://www.npmjs.com/package/redux-persist]                         |
-| redux-thunk                           | [https://www.npmjs.com/package/redux-thunk]                           |
-| @expo/vector-icons                    | [https://www.npmjs.com/package/@expo/vector-icons]                    |
-| @react-native-async-storage/async-storage | [https://www.npmjs.com/package/@react-native-async-storage/async-storage] |
-| react-native-paper                    | [https://www.npmjs.com/package/react-native-paper]                    |

@@ -2,6 +2,7 @@ import React from "react";
 import { StatusBar } from "react-native";
 import Home from "../Pages/Home/index";
 import Authentication from "../Pages/Authentication";
+import AddEmergencyContacts from "../Pages/AddEmergencyContacts";
 
 import CustomAlert from "../Shared/Components/CustomAlert";
 import ThreeBtnAlert from "../Shared/Components/ThreeBtnAlert";
@@ -40,10 +41,12 @@ export default function Navigator() {
             <Stack.Screen
               name="Home"
               component={Home}
-              options={{
-                title: "Home",
-                headerTitleStyle: { fontSize: 25, fontWeight: "700" },
-              }}
+              options={{ title: "Home" }}
+            />
+            <Stack.Screen
+              name="AddEmergencyContacts"
+              component={AddEmergencyContacts}
+              options={{ title: "Add Contacts" }}
             />
           </>
         ) : (

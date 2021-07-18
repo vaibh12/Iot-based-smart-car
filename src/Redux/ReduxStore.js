@@ -3,6 +3,7 @@ import { Auth } from "./Auth/Auth";
 import { Snack } from "./Snack/Snack";
 import { Theme } from "./Theme/Theame";
 import { Alert } from "./Alert/Alert";
+import { EmergencyContacts } from "./EmergencyContacts/index";
 
 import thunk from "redux-thunk";
 import logger from "redux-logger";
@@ -15,7 +16,7 @@ export const ConfigureStore = () => {
     key: "root",
     storage: AsyncStorage,
     debug: true,
-    blacklist: ["snack"],
+    blacklist: ["snack", "alert"],
   };
   const store = createStore(
     persistCombineReducers(config, {
@@ -23,6 +24,7 @@ export const ConfigureStore = () => {
       snack: Snack,
       theme: Theme,
       alert: Alert,
+      emergencyContacts: EmergencyContacts,
     }),
     applyMiddleware(thunk)
   );

@@ -48,10 +48,10 @@ export default function Login(props) {
             style={[styles.iconStyle, { backgroundColor: colors.primaryColor }]}
           />
           <Text style={[styles.headerText, { color: colors.textOne }]}>
-            Boilerplate
+            Smart Car
           </Text>
         </View>
-        <Feather
+        {/* <Feather
           onPress={() => {
             theme.mode ? dispatch(changeToDark()) : dispatch(changeToLight());
           }}
@@ -62,7 +62,7 @@ export default function Login(props) {
             styles.iconStyle,
             { backgroundColor: colors.backTwo, padding: 6 },
           ]}
-        />
+        /> */}
       </View>
       <TextInput
         style={[

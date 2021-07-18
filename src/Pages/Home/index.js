@@ -1,29 +1,100 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   TouchableOpacity,
   StyleSheet,
   View,
   Text,
-  Button,
-  Switch,
   ScrollView,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../Redux/Auth/ActionCreator";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Feather } from "@expo/vector-icons";
-import { hideSnack, showSnack } from "../../Redux/Snack/ActionCreator";
-import { changeToDark, changeToLight } from "../../Redux/Theme/ActionCreator";
-import { show3BtnAlert, showAlert } from "../../Redux/Alert/ActionCreator";
+import ListItem from "../../Shared/Components/ListItem";
+import { showSnack } from "../../Redux/Snack/ActionCreator";
+//
+import * as firebase from "firebase";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
+import * as Location from "expo-location";
+
+const BACKGROUND_FIREBASE_TASK = "background_firebase_task";
+
+// this is the background task to be registerd
+TaskManager.defineTask(BACKGROUND_FIREBASE_TASK, async () => {
+  try {
+    // fetch data here...
+    let error = false;
+    try {
+      await firebase
+        .database()
+        .ref("accident")
+        .on("value", (snapshot) => {
+          const rec = snapshot.val();
+          console.log("Accident data", rec);
+        });
+      error = false;
+    } catch (error) {
+      error = true;
+      console.log("Error in getting accident data", error);
+    }
+    try {
+      await firebase
+        .database()
+        .ref("temp")
+        .on("value", (snapshot) => {
+          const rec = snapshot.val();
+          console.log("Temperature data", rec);
+        });
+      error = false;
+    } catch (error) {
+      error = true;
+      console.log("Error in getting temperature data", error);
+    }
+    return !error
+      ? BackgroundFetch.Result.NewData
+      : BackgroundFetch.Result.NoData;
+  } catch (err) {
+    return BackgroundFetch.Result.Failed;
+  }
+});
+
+// this function registers the background task
+async function registerBackgroundFetchAsync() {
+  try {
+    await BackgroundFetch.registerTaskAsync(BACKGROUND_FIREBASE_TASK, {
+      minimumInterval: 5, // 1 minute
+      stopOnTerminate: false, // android only,
+      startOnBoot: true, // android only
+    });
+    console.log("Task registered");
+  } catch (err) {
+    console.log("Task Register failed:", err);
+  }
+}
+
+// this function unregisters the background task
+async function unregisterBackgroundFetchAsync() {
+  try {
+    BackgroundFetch.unregisterTaskAsync(BACKGROUND_FIREBASE_TASK);
+    console.log("Task unregisterd");
+  } catch (error) {
+    console.log("Here is error in unregistering", error);
+  }
+}
+
 export default function Home(props) {
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
 
   const theme = useSelector((state) => state.theme);
-  const globalAuth = useSelector((state) => state.auth);
+  const { colors } = theme;
+  const emergencyContacts = useSelector((state) => state.emergencyContacts);
 
-  // console.log(theme);
+  const [backgroundTaskStatus, setBackgroundTaskStatus] = useState(null);
+  const [isBackGroundTaskRegisterd, setIsBackGroundTaskRegisterd] =
+    useState(false);
 
   const dispatch = useDispatch();
 
@@ -82,87 +153,81 @@ export default function Home(props) {
     );
   };
 
+  const checkStatusAsync = async () => {
+    const status = await BackgroundFetch.getStatusAsync();
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(
+      BACKGROUND_FIREBASE_TASK
+    );
+    setBackgroundTaskStatus(status);
+    setIsBackGroundTaskRegisterd(isRegistered);
+  };
+
+  const getLocPermission = async () => {
+    let { status } = await Location.requestBackgroundPermissionsAsync();
+    console.log(status);
+  };
+
   useEffect(() => {
     setHeaderOptions();
   }, [theme]);
+
+  useEffect(() => {
+    checkStatusAsync();
+  }, []);
+
+  const toggleFetchTask = async () => {
+    if (isBackGroundTaskRegisterd) {
+      await unregisterBackgroundFetchAsync();
+    } else {
+      if (emergencyContacts.data.length == 0) {
+        dispatch(
+          showSnack(
+            "You have not added any contacts, add contacts to start the app."
+          )
+        );
+        return;
+      }
+      await getLocPermission();
+      await registerBackgroundFetchAsync();
+    }
+    checkStatusAsync();
+  };
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.colors.backTwo }]}
     >
       <ScrollView>
-        <Text></Text>
-        <Button
-          onPress={() => dispatch(showSnack("This is a nice message"))}
-          title="Show snack"
-          color="#841584"
-          accessibilityLabel="Tap to show snack"
+        <ListItem
+          title={"Manage Contacts"}
+          rightIcon={"chevron-right"}
+          leftIcon={"people-outline"}
+          // style={{ marginTop: 3 }}
+          onPress={() => props.navigation.navigate("AddEmergencyContacts")}
+          rightIconColor={colors.textTwo}
         />
-        <Text></Text>
-        <Button
-          onPress={() => dispatch(hideSnack())}
-          title="Hide snack"
-          color="#841584"
-          accessibilityLabel="Tap to hide snack"
-        />
-        <Text></Text>
-        <Button
-          onPress={() =>
-            dispatch(
-              showAlert(
-                "This is a nice header",
-                "This is the subhead\nPressing OK will show a snack",
-                () => dispatch(showSnack("Snack after alert"))
-              )
-            )
-          }
-          title="Show alert"
-          color="#841584"
-          accessibilityLabel="Tap to show snack"
-        />
-        <Text></Text>
-        <Button
-          onPress={() =>
-            dispatch(
-              show3BtnAlert(
-                "This is the header",
-                "THis is the subhead",
-                () => dispatch(showSnack("You pressed the middle button")),
-                "Middle",
-                () => dispatch(showSnack("You pressed the right button")),
-                "Right",
-                () => dispatch(showSnack("You pressed the left button")),
-                "Left"
-              )
-            )
-          }
-          title="Show three button alert"
-          color="#841584"
-          accessibilityLabel="Tap to hide snack"
-        />
-        <Text></Text>
-        <Text style={{ color: theme.colors.textOne }}>Toggel theme</Text>
-        <Switch
-          trackColor={{ false: "#767577", true: "#81b0ff" }}
-          thumbColor={theme.mode ? "#f5dd4b" : "#f4f3f4"}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={() => {
-            theme.mode ? dispatch(changeToDark()) : dispatch(changeToLight());
-          }}
-          value={theme.mode}
-        />
-        <Text style={{ color: theme.colors.textOne, fontWeight: "700" }}>
-          Theme data
+        <Text>{`Is running is background: ${
+          isBackGroundTaskRegisterd ? "Yes" : "No"
+        }`}</Text>
+        <Text>
+          {`Is background task savailable: ${BackgroundFetch?.Status[backgroundTaskStatus]}` ||
+            null}
         </Text>
-        <Text style={{ color: theme.colors.textOne }}>
-          {JSON.stringify(theme, null, 2)}
-        </Text>
-        <Text style={{ color: theme.colors.textOne, fontWeight: "700" }}>
-          Authentiction data
-        </Text>
-        <Text style={{ color: theme.colors.textOne }}>
-          {JSON.stringify(globalAuth, null, 2)}
-        </Text>
+        {emergencyContacts.data.length == 0 ? (
+          <Text style={[styles.noContactsTxt, { color: colors.textOne }]}>
+            You have not added any emergency contacts, add contacts to start the
+            app.
+          </Text>
+        ) : (
+          <TouchableOpacity
+            style={[styles.startBtn, { backgroundColor: colors.primaryColor }]}
+            onPress={toggleFetchTask}
+          >
+            <Text style={[styles.startBtnTxt, { color: "#fff" }]}>
+              {isBackGroundTaskRegisterd ? "Stop" : "Start"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -171,6 +236,23 @@ export default function Home(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  startBtn: {
+    borderRadius: 8,
     alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    marginHorizontal: 20,
+  },
+  startBtnTxt: {
+    fontSize: 17,
+    fontWeight: "700",
+  },
+  noContactsTxt: {
+    fontSize: 16,
+    fontWeight: "700",
+    alignSelf: "center",
+    margin: 10,
+    textAlign: "center",
   },
 });
